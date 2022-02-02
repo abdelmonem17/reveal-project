@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>reveal.js - Auto Animate</title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="../dist/reveal.css">
+		<link rel="stylesheet" href="../dist/theme/black.css" id="theme">
+		<link rel="stylesheet" href="../plugin/highlight/monokai.css">
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<div class="slides">
+				<section data-auto-animate data-auto-animate-unmatched="fade">
+					<h3><a rel="stylesheet" href="https://github.com/near/near-sdk-rs/tree/master/examples/mission-control">Mission control</a></h3>
+					<p>this smart contract code is designed in multi-<a href="https://doc.rust-lang.org/rust-by-example/mod.html">modules</a>
+ and the root of the crate is lib.rs combine them all</p>
+					<pre data-id="code">lib.rs<code data-line-numbers class="hljs" data-trim>
+					mod account;
+					mod agent;
+					mod asset;
+					#[macro_use]
+					mod macros;
+					mod mission_control;
+					mod rate;
+					</code></pre>
+					<p>at line 4 we use macro_use directive with the folling module so that we can export macro rules that defined there</p>
+				</section>
+				<section data-auto-animate data-auto-animate-unmatched="fade">
+					<pre data-id="code">account.rs<code data-line-numbers class="hljs" data-trim>
+use crate::asset::*;
+use crate::rate::*;
+use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use near_sdk::serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::ops;
+					</code></pre>
+					<p>-At the beginning we import members from other crates and modules like first 6 lines
+					   use crate:: means retative to current crate also you can check key word like <a href="https://doc.rust-lang.org/rust-by-example/mod/super.html">super</a>
+								</section>
+<section data-auto-animate data-auto-animate-unmatched="fade">
+					<pre data-id="code">account.rs<code data-line-numbers class="hljs" data-trim>
+#[derive(
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Hash,
+    Clone,
+    Copy,
+    Serialize,
+    Deserialize,
+    Debug,
+    BorshDeserialize,
+    BorshSerialize,
+)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Quantity(pub i32);
+					</code></pre>
+					<p>PartialEq,Eq and PartialOrd there are for <a href="https://doc.rust-lang.org/rust-by-example/trait/ops.html">operators overloading</a> and check the previous link to check other auto-implemented traits.
+					</section>
+<section data-auto-animate data-auto-animate-unmatched="fade">
+					<pre data-id="code">account.rs<code data-line-numbers class="hljs" data-trim>
+pub enum Tranx {
+    Approved(Account, Account),
+    Denied(HashMap&ltAsset, Quantity&gt),
+}
+					</code></pre>
+<a href "https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html">enum</a> in rust is like in other languages which represents named values except it can hold data</p>	
+				</section>
+				<section data-auto-animate data-auto-animate-unmatched="fade">
+					<pre data-id="code">account.rs<code data-line-numbers class="hljs" data-trim>
+impl Account {
+    pub fn quantity(&self, asset: &Asset) -> Quantity {
+        match self.0.get(asset) {
+            Some(quantity) => quantity.clone(),
+            None => Quantity(0),
+        }
+    }
+	//other functions ...
+}
+					</code></pre>
+defines the functions that related to this struct,
+ <a href "https://doc.rust-lang.org/rust-by-example/flow_control/match.html">match</a>  
+  at line three used like switch in other languages but with power of getting data from enum, so here match on <a href="https://doc.rust-lang.org/std/option/">option</a> so it might be Some(with data) or None</p>	
+				</section>
+				<section data-auto-animate data-auto-animate-unmatched="fade">
+					<h3>Auto-Animate Example</h3>
+					<p style="opacity: 0.2; margin-top: 100px;">This will fade out</p>
+					<p>This element is unmatched</p>
+					<pre data-id="code"><code data-line-numbers class="hljs" data-trim>
+						function Example() {
+						  New line!
+						  const [count, setCount] = useState(0);
+						}
+					</code></pre>
+				</section>
+
+				<section data-auto-animate>
+					<p data-id="text-props" style="background: #555; line-height: 1em; letter-spacing: 0em;">Line Height & Letter Spacing</p>
+				</section>
+				<section data-auto-animate>
+					<p data-id="text-props" style="background: #555; line-height: 3em; letter-spacing: 0.2em;">Line Height & Letter Spacing</p>
+				</section>
+
+				<section>
+					<section data-auto-animate>
+						<pre data-id="code"><code data-line-numbers class="hljs" data-trim>
+							import React, { useState } from 'react';
+
+							function Example() {
+							  const [count, setCount] = useState(0);
+
+							  return (
+							    ...
+							  );
+							}
+						</code></pre>
+					</section>
+					<section data-auto-animate>
+						<pre data-id="code"><code data-line-numbers class="hljs" data-trim>
+							function Example() {
+							  const [count, setCount] = useState(0);
+
+							  return (
+							    &lt;div&gt;
+							      &lt;p&gt;You clicked {count} times&lt;/p&gt;
+							      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+							        Click me
+							      &lt;/button&gt;
+							    &lt;/div&gt;
+							  );
+							}
+						</code></pre>
+					</section>
+					<section data-auto-animate>
+						<pre data-id="code"><code data-line-numbers class="hljs" data-trim>
+							function Example() {
+							  // A comment!
+							  const [count, setCount] = useState(0);
+
+							  return (
+							    &lt;div&gt;
+							      &lt;p&gt;You clicked {count} times&lt;/p&gt;
+							      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+							        Click me
+							      &lt;/button&gt;
+							    &lt;/div&gt;
+							  );
+							}
+						</code></pre>
+					</section>
+				</section>
+
+				<section>
+					<section data-auto-animate>
+						<h3>Swapping list items</h3>
+						<ul>
+							<li>One</li>
+							<li>Two</li>
+							<li>Three</li>
+						</ul>
+					</section>
+					<section data-auto-animate>
+						<h3>Swapping list items</h3>
+						<ul>
+							<li>Two</li>
+							<li>One</li>
+							<li>Three</li>
+						</ul>
+					</section>
+					<section data-auto-animate>
+						<h3>Swapping list items</h3>
+						<ul>
+							<li>Two</li>
+							<li>Three</li>
+							<li>One</li>
+						</ul>
+					</section>
+				</section>
+
+				<section data-auto-animate style="height: 600px">
+					<h3 style="opacity: 0.3; font-size: 18px;">SLIDE 1</h3>
+					<h2 data-id="title" style="margin-top: 260px;">Animate Anything</h2>
+					<div data-id="1" style="background: white; position: absolute; top: 150px; left: 16%; width: 60px; height: 60px;"></div>
+					<div data-id="2" style="background: white; position: absolute; top: 150px; left: 36%; width: 60px; height: 60px;"></div>
+					<div data-id="3" style="background: white; position: absolute; top: 150px; left: 56%; width: 60px; height: 60px;"></div>
+					<div data-id="4" style="background: white; position: absolute; top: 150px; left: 76%; width: 60px; height: 60px;"></div>
+				</section>
+				<section data-auto-animate style="height: 600px">
+					<h3 style="opacity: 0.3; font-size: 18px;">SLIDE 2</h3>
+					<h2 data-id="title" style="margin-top: 500px">With Auto Animate</h2>
+					<div data-id="1" style="background: cyan; position: absolute; bottom: 190px; left: 16%; width: 60px; height: 60px;"></div>
+					<div data-id="2" style="background: magenta; position: absolute; bottom: 190px; left: 36%; width: 60px; height: 160px;"></div>
+					<div data-id="3" style="background: yellow; position: absolute; bottom: 190px; left: 56%; width: 60px; height: 260px;"></div>
+					<div data-id="4" style="background: red; position: absolute; bottom: 190px; left: 76%; width: 60px; height: 360px;"></div>
+				</section>
+				<section data-auto-animate style="height: 600px">
+					<h3 style="opacity: 0.3; font-size: 18px;">SLIDE 3</h3>
+					<h2 data-id="title" style="margin-top: 500px; opacity: 0;">With Auto Animate</h2>
+					<div data-id="1" style="background: cyan; position: absolute; top: 50%; left: 50%; width: 400px; height: 400px; margin: -200px 0 0 -200px; border-radius: 400px;"></div>
+					<div data-id="2" style="background: magenta; position: absolute; top: 50%; left: 50%; width: 300px; height: 300px; margin: -150px 0 0 -150px; border-radius: 400px;"></div>
+					<div data-id="3" style="background: yellow; position: absolute; top: 50%; left: 50%; width: 200px; height: 200px; margin: -100px 0 0 -100px; border-radius: 400px;"></div>
+					<div data-id="4" style="background: red; position: absolute; top: 50%; left: 50%; width: 100px; height: 100px; margin: -50px 0 0 -50px; border-radius: 400px;"></div>
+				</section>
+				<section data-auto-animate style="height: 600px">
+					<h3 style="opacity: 0.3; font-size: 18px;">SLIDE 3</h3>
+					<h2 data-id="title" style="margin-top: 500px; opacity: 0;">With Auto Animate</h2>
+					<div data-id="1" style="background: red; position: absolute; top: 250px; left: 16%; width: 60px; height: 60px;"></div>
+					<div data-id="2" style="background: yellow; position: absolute; top: 250px; left: 36%; width: 60px; height: 60px;"></div>
+					<div data-id="3" style="background: magenta; position: absolute; top: 250px; left: 56%; width: 60px; height: 60px;"></div>
+					<div data-id="4" style="background: cyan; position: absolute; top: 250px; left: 76%; width: 60px; height: 60px;"></div>
+				</section>
+
+				<section data-auto-animate data-auto-animate-id="a">
+					<h2>data-auto-animate-id="a"</h2>
+					<h3>A1</h3>
+				</section>
+				<section data-auto-animate data-auto-animate-id="a">
+					<h2>data-auto-animate-id="a"</h2>
+					<h3>A1</h3>
+					<h3>A2</h3>
+				</section>
+				<section data-auto-animate data-auto-animate-id="b">
+					<h2>data-auto-animate-id="b"</h2>
+					<h3>B1</h3>
+				</section>
+				<section data-auto-animate data-auto-animate-id="b">
+					<h2>data-auto-animate-id="b"</h2>
+					<h3>B1</h3>
+					<h3>B2</h3>
+				</section>
+
+			</div>
+
+		</div>
+
+		<script src="../dist/reveal.js"></script>
+		<script src="../plugin/highlight/highlight.js"></script>
+		<script>
+			Reveal.initialize({
+				center: true,
+				hash: true,
+				plugins: [ RevealHighlight ]
+			});
+		</script>
+
+	</body>
+</html>
