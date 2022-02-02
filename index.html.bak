@@ -88,8 +88,82 @@ impl Account {
 					</code></pre>
 defines the functions that related to this struct,
  <a href "https://doc.rust-lang.org/rust-by-example/flow_control/match.html">match</a>  
-  at line three used like switch in other languages but with power of getting data from enum, so here match on <a href="https://doc.rust-lang.org/std/option/">option</a> so it might be Some(with data) or None</p>	
+  at line three used like switch in other languages but with power of getting data from enum, 
+  so here match on the result go calling 'get' function and it is <a href="https://doc.rust-lang.org/std/option/">option</a> so it might be Some(with data) or None</p>	
 				</section>
+					<section data-auto-animate data-auto-animate-unmatched="fade">
+					<pre data-id="code">account.rs<code data-line-numbers class="hljs" data-trim>
+impl Account {
+	//other functions ...
+	pub fn exchange(rate: &Rate, quantity: Quantity, buyer: &Account, seller: &Account) -> Tranx {
+        let credit = &Account(rate.credit.clone()) * quantity;
+        let debit = &Account(rate.debit.clone()) * quantity;
+        let (buyer, seller) = (&(buyer - &debit) + &credit, &(seller - &credit) + &debit);
+        let mut success = true;
+        let mut deficit = HashMap::new();
+		//reset of the function
+		}
+}
+					</code></pre>
+<p style="font-size:80%">exchange is <a href="https://doc.rust-lang.org/rus-by-example/fn/methods.html">associated function</a> defined in the struct
+, line number 4,5 is example of using <a href="https://doc.rust-lang.org/std/ops/trait.Mul.html">Mul operator</a> to product two non-primative types
+and the 6th line also uses add and minus <a href="https://doc.rust-lang.org/std/ops/index.html">operators</a> 
+finally assigning the result to 2 variables and it's called <a href="https://doc.rust-lang.org/rust-by-example/primitives/tuples.html">tuple</a>
+ at 7th line define mutable <a href="https://doc.rust-lang.org/book/ch03-02-data-types.html">primative</a> (bool) which will be changed over the program,
+ at line 8th defining mutable to store key and value pair type called <a href="https://doc.rust-lang.org/std/collections/struct.HashMap.html">hashmap</a>
+				</p>
+				</section>
+	</section>
+	<section data-auto-animate data-auto-animate-unmatched="fade">
+					<pre data-id="code">account.rs<code data-line-numbers class="hljs" data-trim>
+	impl Account {
+		//other functions ...
+		pub fn exchange(rate: &Rate, quantity: Quantity, buyer: &Account, seller: &Account) -> Tranx {
+			 {
+				let Account(buyer) = &buyer;
+				let Account(debit) = debit;
+				for asset in debit.keys() {
+					match buyer.get(asset) {
+						Some(Quantity(quantity)) if *quantity < 0 => {
+							success = false;
+							deficit.insert(asset.clone(), Quantity(*quantity));
+						}
+						_ => (),
+					}
+				}
+            }
+			//reset of the function
+	  }
+	}
+					</code></pre>
+<p style="font-size:70%">{} is a code block mostly used in rust to borrow variable for a period of time so that 
+it can be a workarround for <a href="https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html">borrow rules</a> ,
+line 6,7 highligh how to extract data from tuple struct
+line 8 is example of <a href="https://doc.rust-lang.org/rust-by-example/flow_control/for.html">looping</a> for iterators in rust,
+line 12 asset.clone() used to cloned data to be owned but this required that the 'asset' type implements the <a href="https://doc.rust-lang.org/std/clone/trait.Clone.html">Clone</a> trait
+, *quantity is to make dereferencing it might move if the data doesn't implement Copy trait otherwise copy it.  
+</p>
+	</section>
+		<section data-auto-animate data-auto-animate-unmatched="fade">
+					<pre data-id="code">account.rs<code data-line-numbers class="hljs" data-trim>
+	impl Account {
+		//other functions ...
+		pub fn exchange(rate: &Rate, quantity: Quantity, buyer: &Account, seller: &Account) -> Tranx {
+			//reset of the function
+			 if success {
+            Tranx::Approved(buyer, seller)
+			} else {
+			Tranx::Denied(deficit)
+			}
+	  }
+	}
+					</code></pre>
+<p>every statements in rust must end with ';' but if you don't put it means you want to return this value from the function,
+also there is a special thing in rust is every <a href="https://doc.rust-lang.org/reference/statements-and-expressions.html">expression</a> like 'if' statement return value so here 'if' returns value,
+also return keyword is optional and not recommended
+</p>
+	</section>
+
 				<section data-auto-animate data-auto-animate-unmatched="fade">
 					<h3>Auto-Animate Example</h3>
 					<p style="opacity: 0.2; margin-top: 100px;">This will fade out</p>
