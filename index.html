@@ -11,6 +11,127 @@
    <body>
       <div class="reveal">
          <div class="slides">
+		 <section data-auto-animate data-auto-animate-unmatched="fade">
+               <h3>Your first contract</h3>
+               <p>Smart Contracts are the back-end of your application that runs code and stores data on the blockchain.
+			   All smart contracts on NEAR must be compiled to <a href="https://webassembly.org/">WebAssembly</a> or simply WASM. Currently,
+			   we support two languages <a href="https://www.assemblyscript.org/">AssemblyScript</a> and <a href="https://www.rust-lang.org/">Rust</a> with custom software development kits (SDKs) to assist in their creation 
+			   but you can use any programming language and compile it to wasm.
+			   But here we will use Rust as it is a powerful language with a great developer experience.
+            </section>
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+               <h3><a rel="stylesheet" href="https://github.com/near/near-sdk-rs/tree/master/examples/status-message">status-message</a></h3>
+			   <p>Records the status messages of the accounts that call this contract.</p>
+               <pre data-id="code">Cargo.toml<code data-line-numbers class="hljs" data-trim>
+						[package]
+						name = "status-message"
+						version = "0.1.0"
+						authors = ["Near Inc <hello@nearprotocol.com>"]
+						edition = "2018"
+
+						[lib]
+						crate-type = ["cdylib"]
+					</code></pre>
+               <p style="font-size:80%"><a href="https://doc.rust-lang.org/cargo/reference/config.html">Toml file</a> has configuration for the rust project,
+			   package section has fields that define metadata about the project.
+			   lib section has configuration for the current lib crate, and "cdylib" means dynamic system library will be produced
+			   </p>
+            </section>
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+               <pre data-id="code">lib.rs<code data-line-numbers class="hljs" data-trim>
+						use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+						use near_sdk::{env, log, metadata, near_bindgen, AccountId};
+						use std::collections::HashMap;
+					</code></pre>
+               <p>Importing external crates members like structs,traits, and modules that defined in Cargo.toml,
+			     self at importing mean import current module also in addition to other mentioned members
+				</p>
+            </section>
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+               <pre data-id="code">lib.rs<code data-line-numbers class="hljs" data-trim>
+						metadata! {
+							#[near_bindgen]
+							#[derive(Default, BorshDeserialize, BorshSerialize)]
+							pub struct StatusMessage {
+								records: HashMap&ltAccountId, String&gt,
+							}
+							//reset of the code
+						}
+					</code></pre>
+               <p style="font-size:74%">metadata <a href="https://doc.rust-lang.org/rust-by-example/macros.html">macro rule</a> is used to generate metadata method,
+				after defining a new  <a href="https://doc.rust-lang.org/book/ch05-01-defining-structs.html">struct</a> with it’s members like records as hashmap of account id as key and string as value.
+			    #[near_bindgen] it is a <a href="https://doc.rust-lang.org/reference/procedural-macros.html">proc-macro</a> call used on struct and function implementation to generate the necessary code to be a valid NEAR contract and expose the intended functions to be able to be called externally.
+				#[derive(Default, BorshDeserialize, BorshSerialize)] it is a proc-macro call for derive to implement these <a href="https://doc.rust-lang.org/book/ch10-02-traits.html">traits</a>
+				for this struct automatically.
+				<a href="https://docs.rs/borsh/latest/borsh/de/trait.BorshDeserialize.html">BorshDeserialize</a>, <a href="https://docs.rs/borsh/latest/borsh/de/trait.BorshDeserialize.html">BorshSerialize</a> is used to convert to and from object and binary value, 
+				<a href="">Default</a> it is used to make creating objects in the default state straight forward.
+				
+				</p>
+            </section>
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+               <pre data-id="code">lib.rs<code data-line-numbers class="hljs" data-trim>
+						metadata! {
+						//beginning of the code
+							#[near_bindgen]
+							impl StatusMessage {
+								#[payable]
+								pub fn set_status(&mut self, message: String) {
+									let account_id = env::signer_account_id();
+									log!("{} set_status with message {}", account_id, message);
+									self.records.insert(account_id, message);
+								}
+							//reset of the code
+						}
+					</code></pre>
+               <p style="font-size:69%">impl StatusMessage{ } is to attach some functionality to this struct.
+				#[payable] is a proc-macro call to allow methods to accept token transfer together with the function call <a href="https://www.near-sdk.io/contract-interface/payable-methods">more..</a> .
+				pub fn set_status(&mut self, message: String) {} to define a member function with string a parameter and &mut self to <a href="https://doc.rust-lang.org/rust-by-example/scope/borrow.html">borrow</a> the current object in mutable state using ‘&mut self’ so that you can edit the current object inside this function and it is called change from contract point of view so when you see &mut self in function at contract so it means a change function.
+			   </p>
+            </section>
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+               <pre data-id="code">lib.rs<code data-line-numbers class="hljs" data-trim>
+						metadata! {
+						//beginning of the code
+							#[near_bindgen]
+							impl StatusMessage {
+								#[payable]
+								pub fn set_status(&mut self, message: String) {
+									let account_id = env::signer_account_id();
+									log!("{} set_status with message {}", account_id, message);
+									self.records.insert(account_id, message);
+								}
+							//reset of the code
+						}
+					}
+					</code></pre>
+               <p style="font-size:90%">7th line calling function from module called ‘env’  and assign the result ,
+			    in a new immutable variable called ‘account_id’,
+				8th line it logs this message to the console and it is provided by Near,
+			    9th this line store key and value in records in current object.
+			   </p>
+            </section>
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+               <pre data-id="code">lib.rs<code data-line-numbers class="hljs" data-trim>
+						metadata! {
+						//beginning of the code
+							#[near_bindgen]
+							impl StatusMessage {
+							pub fn get_status(&self, account_id: AccountId) -> Option::&ltString&gt {
+								log!("get_status for account_id {}", account_id);
+								self.records.get(&account_id).cloned()
+							}
+						}
+					}
+					</code></pre>
+               <p style="font-size:90%">pub fn get_status(&self){}  is a function definition and &self is to make the current object readonly,
+			   and this function is called a view from point of view for smart contract.
+			   </p>
+            </section>
+		 <section data-auto-animate data-auto-animate-unmatched="fade">
+               <p style="font-size:250%">
+                 End of contract.
+				</p>
+            </section>
             <section data-auto-animate data-auto-animate-unmatched="fade">
                <h3><a rel="stylesheet" href="https://github.com/near/near-sdk-rs/tree/master/examples/mission-control">Mission control</a></h3>
                <p>This smart contract code is designed in multi-<a href="https://doc.rust-lang.org/rust-by-example/mod.html">modules</a>
@@ -25,7 +146,7 @@
 						mod mission_control;
 						mod rate;
 					</code></pre>
-               <p>at line 4 we use macro_use directive with the folling module so that we can export macro rules that defined there</p>
+               <p>at line 4 we use macro_use directive with the following module so that we can export macro rules that defined there</p>
             </section>
             <section data-auto-animate data-auto-animate-unmatched="fade">
                <pre data-id="code">account.rs<code data-line-numbers class="hljs" data-trim>
