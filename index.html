@@ -104,10 +104,12 @@
 						}
 					}
 					</code></pre>
-               <p style="font-size:90%">7th line calling function from module called ‘env’  and assign the result ,
+               <p style="font-size:70%">7th line calling function from module called ‘env’  and assign the result ,
 			    in a new immutable variable called ‘account_id’,
 				8th line it logs this message to the console and it is provided by Near,
-			    9th this line store key and value in records in current object.
+			    9th this line store key and value in records in current object,
+				and note here pass variable to the function so the function will take a copy of the variable,
+				otherwise it will take the <a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership</a> of the variable.
 			   </p>
             </section>
 			<section data-auto-animate data-auto-animate-unmatched="fade">
@@ -157,7 +159,7 @@
 						use std::collections::HashMap;
 						use std::ops;
 					</code></pre>
-               <p>-At the beginning we import members from other crates and modules like first 6 lines
+               <p>at the beginning we import members from other crates and modules like first 6 lines
                   use crate:: means retative to current crate also you can check key word like <a href="https://doc.rust-lang.org/rust-by-example/mod/super.html">super</a>
             </section>
             <section data-auto-animate data-auto-animate-unmatched="fade">
