@@ -2,7 +2,7 @@
 <html lang="en">
    <head>
       <meta charset="utf-8">
-      <title>reveal.js - Auto Animate</title>
+      <title>reveal.js - Rust with NEAR</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
       <link rel="stylesheet" href="../dist/reveal.css">
       <link rel="stylesheet" href="../dist/theme/black.css" id="theme">
@@ -439,7 +439,150 @@
                  End of contract.
 				</p>
             </section>
-         </div>
+			
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+			   <h3>Learning with fixing errors and warnnings</h3>
+               <p>we will investigate smart contracts that has warrnings and errors appears when using <a href="https://doc.rust-lang.org/cargo/commands/cargo-check.html">cargo check</a> then fixing them one by one.</br>
+               </p>             
+			 </section>
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+			   <p><a rel="stylesheet" href="https://github.com/near/near-sdk-rs/tree/master/examples/status-message-collections">status message-collection</a>
+              : records the status messages of the accounts that call this contract.
+               </p>
+               <pre data-id="code">lib.rs<code data-line-numbers class="hljs" data-trim>
+						use near_sdk::collections::{LookupMap, LookupSet};
+						use near_sdk::{env, near_bindgen, BorshStorageKey, AccountId};
+
+						#[derive(BorshSerialize, BorshStorageKey)]
+						enum StorageKey {
+							Records,
+							UniqueValues,
+						}
+
+						#[near_bindgen]
+						#[derive(BorshDeserialize, BorshSerialize)]
+						pub struct StatusMessage {
+							pub records: LookupMap<AccountId, String>,
+							pub unique_values: LookupSet<String>,
+						}
+
+						impl Default for StatusMessage {
+							fn default() -> self {
+								self {
+									records: LookupMap::new(StorageKey::Records),
+									unique_values: LookupSet::new(StorageKey::UniqueValues),
+								}
+							}
+						}
+
+						#[near_bindgen]
+						impl StatusMessage {
+							/// Returns true if the message is unique
+							pub fn set_status(&self, message: String) -> bool {
+								let account_id = env::signer_account_id();
+								self.records.insert(&account_id, message);
+								self.unique_values.insert(&message)
+							}
+
+							pub fn get_status(&self, account_id: AccountId) -> Option<String> {
+								self.records.get(&account_id);
+							}
+						}
+					</code></pre>
+               <p>when you compile the following code you will get following errors</p>
+            </section>
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+			   <p>
+               </p>
+               <pre data-id="code">lib.rs<code data-line-numbers class="hljs" data-trim>
+					error: cannot find derive macro `BorshSerialize` in this scope
+					 --> src\lib.rs:5:10
+					  |
+					5 | #[derive(BorshSerialize, BorshStorageKey)]
+					  |          ^^^^^^^^^^^^^^
+
+					error: cannot find derive macro `BorshDeserialize` in this scope
+					  --> src\lib.rs:12:10
+					   |
+					12 | #[derive(BorshDeserialize, BorshSerialize)]
+					   |          ^^^^^^^^^^^^^^^^
+			</code></pre>
+               <p style="font-size:70%">the compiler here throws error that it can't find 'BorshDeserialize' and 'BorshSeserialize' so 
+			   to solve it you must provide full path to these traits or include them at start of the file like 
+			   <pre><code>use near_sdk::borsh::{BorshDeserialize, BorshSerialize};</code></pre></p>
+            </section>
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+			   <p>
+               </p>
+               <pre data-id="code">lib.rs<code data-line-numbers class="hljs" data-trim>
+					error[E0573]: expected type, found module `self`
+					  --> src\lib.rs:19:21
+					   |
+					19 |     fn default() -> self {
+					   |                     ^^^^ help: a self type with a similar name exists (notice the capitalization): `Self`
+
+					error[E0574]: expected struct, variant or union type, found module `self`
+					  --> src\lib.rs:20:9
+					   |
+					20 |         self {
+					   |         ^^^^ help: a self type with a similar name exists (notice the capitalization): `Self`
+			</code></pre>
+               <p style="font-size:70%">the compiler here throws error that <a href="https://stackoverflow.com/questions/32304595/whats-the-difference-between-self-and-self">self</a> is not a type to be returned
+			   or to be used to define new variable and the compiler suggests you mis-spilled of word <a href="https://stackoverflow.com/questions/32304595/whats-the-difference-between-self-and-self">Self</a></p>
+            </section>
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+               <pre data-id="code">lib.rs<code data-line-numbers class="hljs" data-trim>
+					--> src\lib.rs:32:42
+				   |
+				32 |         self.records.insert(&account_id, message);
+				   |                                          ^^^^^^^
+				   |                                          |
+				   |             expected `&std::string::String`, found struct `std::string::String`
+				   |             help: consider borrowing here: `&message`
+
+						^^^^^^^^^^^^^^^^
+			</code></pre>
+               <p style="font-size:70%">Rust compiler is very helpful and lead you fix your error with some advisable messages 
+			    so here you must pass a reference to the <a href="https://doc.rust-lang.org/stable/std/string/struct.String.html">string</a> not the string it self
+			   </p>
+            </section>
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+               <pre data-id="code">lib.rs<code data-line-numbers class="hljs" data-trim>
+					error[E0308]: mismatched types
+					  --> src\lib.rs:36:60
+					   |
+					36 |     pub fn get_status(&mut self, account_id: AccountId) -> Option&ltString&gt {
+					   |            ----------                                      ^^^^^^^^^^^^^^ expected enum `std::option::Option`, found `()`
+					   |            |
+					   |            implicitly returns `()` as its body has no tail or `return` expression
+					37 |         self.records.get(&account_id);
+					   |                                      - help: consider removing this semicolon
+					   |
+					   = note:   expected enum `std::option::Option&ltstd::string::String&gt`
+							   found unit type `()`
+			</code></pre>
+               <p style="font-size:65%">in rust you can return data from the function simply by put the value 
+			   at the end of the function without a semicolon or put semicolon but use <a href="https://doc.rust-lang.org/std/keyword.return.html">return</a> keyword, 
+			   so here the compiler says that you return nothing 
+			   but it function wants <a href="https://doc.rust-lang.org/std/option/">Option</a> of string to be returned, 
+			   so fix it by removing the semicolon at the last line in the function so that the return from calling 'get' function could be returned,
+			   'error[E0308]' this number could be helpful and you can search with it to get the full details and examples for this error</p>
+            </section>
+			<section data-auto-animate data-auto-animate-unmatched="fade">
+               <pre data-id="code">lib.rs<code data-line-numbers class="hljs" data-trim>
+					error[E0596]: cannot borrow `self.records` as mutable, as it is behind a `&` reference
+					  --> src\lib.rs:32:9
+					   |
+					30 |     pub fn set_status(&self, message: String) -> bool {
+					   |                       ----- help: consider changing this to be a mutable reference: `&mut self`
+					31 |         let account_id = env::signer_account_id();
+					32 |         self.records.insert(&account_id, &message);
+					   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `self` is a `&` reference, so the data it refers to cannot be borrowed as mutable
+			</code></pre>
+               <p style="font-size:65%">in rust in order to modify a variable you must define at as a mutable
+			   , so here to here to update in current object you must declare it as <a href="https://doc.rust-lang.org/book/ch04-02-references-and-borrowing.html">mutable reference</a></p>
+			</section>
+  </div>
       </div>
       <script src="../dist/reveal.js"></script>
       <script src="../plugin/highlight/highlight.js"></script>
